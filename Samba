@@ -1,0 +1,46 @@
+# Realizar procedimentos como superuser
+sudo bash
+
+# Instalar Samba
+apt-get install samba
+
+# Backup das configurações
+cp /etc/samba/smb.conf /etc/samba/smb.conf.bkp
+
+# Configurando o smb.conf
+gedit /etc/samba/smb.conf
+
+# Nome da pasta que irá aparecer no Windows (Colocar abaixo do workgroup)
+netbios name = Marcos
+
+# Final do arquivo
+
+# Criando novo compartilhamento
+[Marcos]
+# Nome do compartilhamento
+comment = Marcos
+# Caminho da pasta, no Linux, que será compartilhada
+path = /home/max/teste
+# Se todos os compartilhamentos poderão ser acessados por todos os usuários
+public = yes
+# Se o compartilhamento será visível ou oculto na rede (yes para visível)
+browseable = yes
+writable = yes
+read only = no
+
+# Devolta ao terminal
+
+# Dar a permissão rwx
+chmod 777 /home/max/teste
+
+# Reiniciar o samba
+/etc/init.d/samba restart
+
+# Ver IP
+ifconfig
+
+
+# Remover Samba
+dpkg --remove --force-remove-reinstreq samba
+dpkg --purge --force-remove-reinstreq samba
+mv /etc/samba/smb.conf.bkp /etc/samba/smb.conf
