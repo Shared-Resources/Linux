@@ -1,0 +1,462 @@
+Sobre este documento
+
+Exemplos de linha de comando e scripts com uso do find.
+
+Os comandos e dicas podem não atender as suas necessidades, não ser compatível com sua instalação, use como referencia, tente adaptar ao seu ambiente.
+
+O que é find?
+
+O programa find faz parte das instalações de sistemas Linux, é muito útil na busca e procura de arquivos na árvore de diretórios do sistema, está presente em praticamente toda instalação padrão.
+
+Muito versátil nos critérios de pesquisa, por usuário, arquivo, data, permissões e muito mais.
+
+Extremamente poderoso, permite combinar resultados do find com expressões regulares, permite que o usuário especifique uma ação como remover, copiar e etc..
+
+É usado para encontrar arquivos que correspondam a várias características dadas, e para desempenhar ações sobre esses arquivos.
+
+Vem no pacote findutils e seu executável fica em /usr/bin/find, dependendo da distro pode mudar, use as ferramentas da distro para localizar em sua instalação.
+
+Página do manual.
+
+    man find
+    find --help
+    info find
+Imprimir o manual do find man -t find |lpr
+
+Não esqueça do melhor de todos, Google, combine find com a expressão desejada.
+
+Ambiente gráfico
+
+kfind - KDE - menu K -> executar comando -> na caixa de dialogo digite kfind
+
+Ou na linha de comando (prompt) de um konsole kfind
+
+No Gnome use gsearchtool
+
+No navegador, no endereço da URL : file:/// exibe a arvore de diretórios, funciona no Firefox, Konqueror, Galeon, Mozilla ...
+
+filtros e redirecionamento
+
+Combinar com outros filtros ou desviar o resultado para arquivo.
+
+Desvia o resultado do console para arquivo meuteste.
+
+  find /home/zago/guiaz/ -name "*.pdf" -exec echo {} \; > meuteste
+Exibe o resultado somente dos arquivos contendo samba no nome.
+
+  find /home/zago/guiaz/ -name "*.pdf" -exec echo {} \; | grep samba
+Inverter a seleção use a diretiva -v para pegar maiusculas e minusculas use -i.
+
+  find /home/zago/guiaz/ -name "*.txt" -exec echo {} \; | grep -iv gif
+Cuidado com estes filtros, o grep trabalha com os resultados que vem antes do pipe |, tanto echo como rm ficam antes, a ação de echo é exibir o resultado filtrado por find, então o grep pega este resultado do find para filtrar, com o rm no lugar do echo isto não acontece, o rm simplesmente apaga o que atender a condição de procura do find, portanto com rm o filtro que vem depois de "|" fica sem efeito.
+
+localizar por usuário ou permissão
+
+Procurar por arquivos de um usuário especifico, exemplo do usuário zago root.
+
+  find / -user zago
+  find . -user root
+Exemplo para localizar e exibir no formato de ls -la. listar todos arquivos do usuário zago, troque pelo seu usuário na linha abaixo.
+
+find -user zago -exec ls -la {} \;
+
+Inverter o resultado, listar tudo que não for do usuário informado.
+
+find . ! -user zago -exec ls -la {} \;
+
+find . ! -user root -exec ls -la {} \;
+
+encontra todos os arquivos cujas permissões correspondam a 111 (executável)
+
+  find . -perm +111
+  find / -perm +111 -type f
+  
+  Procurar em diretório especifico, exemplo os executaveis do KDE.
+  find /usr/lib/kde3/bin/ -perm +111 -type f
+procura por parte do nome de arquivo
+
+Procurar em /home/zago todos os arquivos que inicia com sa
+
+  find /home/zago -name sa*
+procura no HD inteiro, (em HD com muitos arquivos esta procura pode ser demorada).
+
+  find / -name sa*
+  find / -name nome-do-arquivo
+Procurar arquivos .pdf abaixo do diretório /home/zago.
+
+  find /home/zago -name *.pdf
+No exemplo acima listará somente arquivos com terminação em .pdf em minusculo, prefira a opção abaixo que não diferencia maiusculo de minusculo e procura em qualquer parte do nome do arquivo.
+
+  find /home/zago -print | grep -i "pdf"
+Procurar por nomes de arquivos que contém determinada expressão no nome, por exemplo: procurar no diretório /home/zago/guiaz por arquivos que contenha no nome o termo cl9
+
+  find /home/zago/guiaz -print |grep -i "cl9"
+  /home/zago/guiaz/samba/samba-cl9.txt
+  /home/zago/guiaz/samba/smb.conf-cl9
+  /home/zago/guiaz/samba/samba-faq-cl9.txt
+Refinando a pesquisa com duas condições, alguns comandos e resultados obtidos:
+
+  find /home/zago/guiaz/*2.6* -iname "*compilar*"
+  
+  [zago@faqcl10 zago]$ find /home/zago/guiaz/*2.6* -iname "*compilar*"
+  /home/zago/guiaz/kernel-2.6-compilar.txt
+  [zago@faqcl10 zago]$ find /home/zago/guiaz/*2.6* -iname "*txt*"
+  /home/zago/guiaz/kernel-2.6-compilar.txt
+  /home/zago/guiaz/kernel-2.6.txt
+  
+  find /lib/modules/*2.6.5* -iname "*nvidia*"
+  [root@cl10 root]# find /lib/modules/*2.6.5* -iname "*nvidia*"
+  /lib/modules/2.6.5-63077cl/kernel/drivers/char/agp/nvidia-agp.ko
+  /lib/modules/2.6.5-63077clsmp/kernel/drivers/char/agp/nvidia-agp.ko
+  [root@cl10 root]# find /lib/modules/*2.6.5* -iname "*smp*"
+  /lib/modules/2.6.5-63077clsmp
+  
+  [root@cl10 root]# find /lib/*mod* -iname "*driv*"
+  /lib/modules/2.6.5-63077cl/kernel/drivers
+  /lib/modules/2.6.5-63077cl/kernel/sound/drivers
+  /lib/modules/2.6.5-63077clsmp/kernel/drivers
+  /lib/modules/2.6.5-63077clsmp/kernel/sound/drivers
+Outros exemplos:
+
+  find /home/zago/ -iname "cache*"
+find + tar empacotar e compactar
+
+Pegar todos arquivos .txt de /tmp/guiaz para criar guiaz.tar.gz
+
+  find /tmp/guiaz -name "*.txt" | xargs tar -zcvf guiaz.tar.gz 
+Alguns exemplos de uso combinando find com tar.
+
+  find /home/zago/guiaz -mtime -1 -type f -print | tar zcvf meusarq.tar.gz -T -
+  
+  tar -zcvf meusarq.tar.gz `find . -user zago -print`
+  
+  tar -zcvf meusarq.tar.gz `find /home/zago/docs -user zago -print` 
+Veja mais exemplos e dicas sobre tar
+http://www.zago.eti.br/tar.html
+find + grep - Pesquisa dentro do arquivo
+
+Procurar dentro do arquivo use o grep, por exemplo, pesquisar dentro de todos os arquivos que estão abaixo do diretório squid
+
+  grep "frase que procuro" -r /var/log/squid/
+  
+  find /var/log/squid/ -type f -exec grep "frase que procuro" {} \;
+  
+  find /var/log/ -name "*.log" | xargs grep -E "frase que procuro"
+  
+  Procura em todos .txt que estão abaixo de /tmp/guiaz
+  find /tmp/guiaz -name "*.txt" | xargs grep -E "frase que procuro"
+  
+  Procura somente no diretório corrente.
+  find -type f -maxdepth 1 | xargs grep -E "frase que procuro"
+  
+  procura em *.c and *.h por "search string" no diretório corrente e abaixo
+  find -name "*.[ch]" | xargs grep -E "frase que procuro"
+pesquisa com grep - FAQ e dicas
+http://www.zago.eti.br/grep.txt
+find + rm - remover arquivos
+
+ATENÇÃO!, CUIDADO!, redobre os cuidados e atenção com uso do "rm"
+
+Uso do find combinado com rm, mv e outros comandos destrutivos pode causar serios problemas, um simples erro de interpretação pode obter resultados diferente do esperado, quando executado como root pode danificar todo o sistema, todo cuidado é pouco.
+
+Alguns exemplos, encontrar e apagar todos os temporarios .txt~ em /home/zago/guiaz, ideal em scripts, não pede confirmação.
+
+Diminua os riscos, pratique em ambiente de testes, antes de remover arquivos, tente conferir os resultados com "echo" ou "ls", depois de confirmado os resultados, então faça a troca para "rm".
+
+Alguns exemplos de uso do com echo em lugar de rm, na linha de comando ou script, troque rm por echo, os arquivos que listar na tela são os memos que serão apagados quando executar a linha de comando com rm, ex. pra testar, (com echo ou ls -la em lugar de rm).
+
+  find /home/zago/guiaz/ -name "*.txt~" -exec echo {} \;
+  find /home/zago/guiaz/ -name "*.txt~" -exec ls -la {} \;
+Ou redirecione a saida para arquivo e depois verifique o conteúdo do arquivo com seu editor de texto preferido, exemplo da linha de comando acima, redirecionando o resultado para /tmp/meuteste.txt
+
+  find /home/zago/guiaz/ -name "*.txt~" -exec ls -l {} \; > /tmp/meuteste.txt
+Depois de conferir o resultado, para remover, faça a troca do echo ou ls -la por rm, exemplo.
+
+  find /home/zago/guiaz/ -name "*.txt~" -exec rm {} \;
+procurar e apagar um arquivo especifico.
+
+  find /caminho/ -name nome_do_arquivo -type f | xargs rm -f
+Listar no console os arquivos que estão sendo removidos, não tem pedido de confirmação, somente exibe no console os arquivos removidos.
+
+  find /home/zago/guiaz/ -name "*.txt~" -exec rm -fv {} \;
+Incluir também sub-diretórios requer "r", então use neste formato;
+
+  find /home/zago/guiaz/ -name "*.txt~" -exec rm -rfv {} \;
+Redirecionar para arquivo a lista de todos os arquivos removidos;
+
+  find /home/zago/guiaz/ -name "*.html" -exec rm -fv {} \; > htmlapagados.txt
+Pedir confirmação antes de remover o arquivo, altere -exec por -ok,
+
+  assim não pede confirmação:
+  find /home/zago/guiaz/ -name "*.txt~" -exec rm {} \;
+O mesmo comando acima modificado pra pedir confirmação, com -ok pede confirmação para exclusão, ideal pra usar na linha de comando.
+
+  find /home/zago/guiaz/ -name "*.txt~" -ok rm {} \;
+  
+  Ex.
+  [zago@faqcl9 guiaz]$ find /home/zago/guiaz/ -name "*.gif" -ok rm {} \;
+  < rm ... /home/zago/guiaz/tmp/admcorreiopq.gif > ? y
+  < rm ... /home/zago/guiaz/zagop.gif > ? n
+  < rm ... /home/zago/guiaz/pinguin.gif > ? n
+Procura em todos os diretórios e apagar todos os arquivos .old, pede confirmação pra cada um.
+
+  find / -name "*.old" -ok rm {} \;
+Script para remover todos .mp3 do disco
+
+  #!/bin/bash
+  for arq in $(find / -name *.mp3) do
+  rm -rf $arq
+  done
+Remover de um diretório especifico, informe o caminho completo em lugar da / no exemplo acima.
+
+find + wc - Contar arquivos e linhas
+
+Contar arquivos, saber quantos .txt existem em /home/zago
+
+  find /home/zago/guiaz/ -name "*.txt" | wc -l
+Contar somente os alterados nas ultimas 24 horas
+
+  find /home/zago/guiaz -mtime 0 | wc -l
+Listar todos .txt com a quantidade de linhas de cada arquivo;
+
+  find /home/zago/guiaz/ -name "*.txt" -exec wc -l {} \;
+find + cp - copiar arquivos
+
+Procurar arquivos especificos e copiar para outro diretório
+
+Ideal em script de backup, montar imagem ISO para queimar CD/DVD e etc..
+
+crie o diretório destino ou utilize um já existente, exemplo para copiar todos os .txt de /home/zago/guiaz para /home/backup/faq
+
+    find /home/zago/guiaz -name \*.txt -type f -exec cp {} /home/backup/faq \;
+Cuidado com este comando, não cria a arvore de diretórios no destino, arquivos de subdiretórios que atente a condição serão copiados no raiz do diretório destino, portanto mistura tudo e arquivos com mesmo nome serão sobrescritos.
+
+Para não descer nos sub-diretórios, copiar somente arquivos do diretório indicado, use (-maxdepth 1), exemplo para copiar somente arquivos do diretório corrente e que foram modificados nas ultimas 24 horas.
+
+  find -maxdepth 1  -mtime 0 -exec cp {} /home/backup/faq \;
+Manter as permissões e ID do dono do arquivo acrescente -ax, ex.
+
+  find /home/zago/guiaz -name \*.txt -type f -exec cp -ax {} /home/backup/faq \;
+find + mv - mover arquivos
+
+Localizar arquivos com mais de 30 dias no diretório /var/lib/smart/packages e mover para o diretório /home/rpmsmart
+
+  mkdir /home/rpmsmart
+  
+  localizar e listar,  testar o resultado do comando 
+  find /var/lib/smart/packages -mtime +30 -exec echo {} \;
+  
+  mover arquivos, trocar echo no comando acima por rm no comando abaixo.
+  find /var/lib/smart/packages -mtime +30 -exec mv {} /home/rpmsmart  \;
+Copiar arquivos, veja tópico find + cp.
+
+find com exclusão de arquivos especifico
+
+Find com restrição, exclusão de arquivos na listagem.
+
+  find . -name A-\*.html ! -name A-menu.html ! -name A-judas.html
+Com rm - remover todos que o filtro pegar, exceto os indicados depois da negação (!)
+
+  find . -name A-\*.html ! -name A-menu.html ! -name A-judas.html -exec rm -f {} \;
+find por data de modificação do arquivo
+
+O find tem os "três tempos" típicos de todo FS Unix, pode pesquisar por minuto, dia, data especifica, útil na procura de arquivos modificados ou acessados.
+
+A pesquisa compara o tempo informado com a data e hora atual do sistema.
+
+Direto do man find (copia parcial do CL10, somente algumas partes sobre tempo), tem mais opções no man
+
+         Argumentos numéricos pode ser especificados como
+  
+         +n     para maior que n,
+  
+         -n     para menor que n,
+  
+         n      para exatamente igual a n.
+  
+         -amin n
+                Arquivo foi acessado em n minutos atrás.
+  
+         -anewer file
+                Arquivo  foi  acessado  mais recentemente do que file tenha sido
+                modificado.  -anewer é afetado por  -follow somente  se  -follow
+                vier antes que -anewer na linha de comandos.
+  
+         -atime n
+                Arquivo foi acessado pela última vez nas últimas *24 horas.
+  
+         -cmin n
+                O status do arquivo foi alterado em até n minutos atrás.
+  
+         -cnewer file
+                O  status  do arquivo foi alterado mais recentemente do que file
+                foi modificado.  -cnewer é afetado por -follow somente se  -fol-
+                low vier antes que -cnewer na linha de comando.
+  
+         -ctime n
+                O status do arquivo foi mudado nas n*24 horas atrás.
+  
+         -mmin n
+                Os dados dos arquivos foram modificados em n minutos atrás.
+  
+         -mtime n
+                Os dados foram modificados em até n*24 horas atrás
+  
+         -newer file
+                O arquivo foi modificado mais recentemente que file.   -newer  é
+                afetado  por   -follow somente se -follow vem antes de -newer na
+                linha de comando.
+Exemplo de comando para listar somente os arquivos modificados durante os ultimos 3 minutos dentro do diretório /tmp/txt.
+
+find /tmp/txt -type f -mmin -3
+
+Onde:
+
+/tmp/txt é o diretório de pesquisa.
+
+-type f indica qual o tipo de arquivo, se arquivo regular, diretório, link e etc..
+
+-mmin -3 lista somente os modificados em tempo inferior a 3 minutos, com sinal (+) +3 lista somente arquivos que foram modificados a mais de 3 minutos, 3 sem o sinal lista somente os modificados exatamente a 3 minutos passados, tempo decorrido igual a 3 minutos, cuidado com esta contagem, 3 sem sinal é exatamente igual, com - ou + não inclue os minutos informado, portanto são tempos diferente, menor, igual ou maior, -3 lista somente quando o tempo decorrido for menor que 3 minutos e não menor ou igual.
+
+Explicando de outra maneira.
+
+  find /tmp/txt -type f -mmin -3
+   |     |        |   |   |    |
+   |     |        |   |   |    |____ tempo para o paramentro anterior -3, 3 ou +3
+   |     |        |   |   |________ modificados em n minutos conforme paramentro seguinte.
+   |     |        |   |             -ctime para multiplos de 24 e mais opções no man.
+   |     |        |   |_ f = arquivo regular, d=diretórios (veja opções no man) 
+   |     |        |____ arquivo é do tipo definido no parametro seguinte
+   |     |_______ caminho da pesquisa, diretório e sub-diretórios onde pesquisar
+   |_________ executar o comando find
+Passe o resultado do comando para outro aplicativo (comando), use "|" entre o final da linha e os comandos como exec, xargs, cut, sed, awk e etc...
+
+Alguns exemplos com xargs executar rm, exec executar cp, aplicar somente nos arquivos que atende a condição, .
+
+remover arquivos modificados a menos de 3 minutos.
+
+find /tmp/txt -type f -mmin -3 | xargs rm -rf
+
+remover arquivos modificados a mais de 3 dias (3*24horas)
+
+find /tmp/txt -mtime +3 -type f | xargs rm -rf
+
+Copiar para outro diretórios os modificados a menos de 3 minutos.
+
+find /tmp/txt -type f -mmin -3 -exec cp -ax {} /home/backup/faq \;
+
+Mais alguns exemplos de comando.
+
+-mtime 0 procura por modificados nas ultimas 24 horas.
+
+Procurar em todo o HD find / -mtime 0
+
+Remover arquivos por data, alguns exemplos;
+
+  find /dir -mtime +30 -exec rm {} \;
+Onde +30 = mais de 30 dias passados, em lugar de -mtime +30 pode variar com -ctime e -atime, com o -exec pode modificar (rm), para outras opções como cp, mv ou até mesmo exibir o resultado no console com echo para testar e conferir antecipadamente o que será apagado com rm, ou simplesmente ver quais arquivos não foram modificados nos ultimos 30 dias, exemplo;
+
+  find /home/zago/guiaz -mtime +30 -exec echo {} \;
+  find /home/zago/guiaz -mtime +30 -exec ls -la {} \;
+Se o resultado no console for o que realmente quer apagar, use a seta para voltar a linha de comando e altere de echo para rm.
+
+Combinar pesquisa incluindo data e nome de arquivo, exemplo de procura por arquivos que iniciam com "z" e não foram modificados a mais de 90 dias.
+
+  find /home/zago/guiaz/ -mtime +90 -and -name "z*" -exec echo {} \;
+No exemplo acima exibe o resultado no console, caso queira outra ação, altere echo para o comando que deseja executar; rm, cp, mv e etc...
+
+Procurar abaixo de um diretório por arquivos modificados nas ultimas 24 horas, menos de um dia, por exemplo em tudo abaixo de /home/zago
+
+  find /home/zago/guiaz -mtime 0
+Parte do script que utilizo pra atualizar o FAQ (site), em resumo faz a copia para outro diretório dos arquivos modificados nas ultimas 24 horas e depois envia por ssh pra uma maquina e por ftp pra outra
+
+Neste exemplo cortei varias linhas pra encurtar o script, a finalidade aqui é servir de modelo.
+
+  #!/bin/bash
+  cd /home/zago
+  rm -rf Linux-BR-FAQ*
+  tar -zcvf Linux-BR-FAQ-`date +%d.%b.%Y`.tar.gz --exclude /home/zago/guiaz/apostilas --exclude /home/zago/guiaz/drivers /home/zago/guiaz
+  chmod 777 Linux-BR-FAQ-`date +%d.%b.%Y`.tar.gz
+  #rm -rf /home/zago/atusite
+  mkdir /home/zago/atusite
+  cd /home/zago/guiaz
+  #apaga todos .txt~ (temporarios)
+  find /home/zago/guiaz/ -name "*.txt~" -exec rm {} \;
+  find -maxdepth 1  -mtime 0 -exec cp {} /home/zago/atusite \;
+  cd /home/zago/guiaz/samba
+  mkdir /home/zago/atusite/samba
+  find -maxdepth 1  -mtime 0 -exec cp {} /home/zago/atusite/samba \;
+  cd /home/zago/guiaz/modem
+  mkdir /home/zago/atusite/modem
+  find -maxdepth 1  -mtime 0 -exec cp {} /home/zago/atusite/modem \;
+  #--corte de algumas linhas--
+  cd /home/zago/atusite
+  scp -r * zago@192.168.1.2:/srv/www/default/html/zago/
+  cd /home/zago
+  scp Linux-BR-FAQ* zago@192.168.1.2:/srv/www/default/html/zago/faq/
+  rm -rf Linux-BR-FAQ*
+  cd /home/zago/docs
+  ftp -vn www.zago.eti.br < atusite
+  rm -f /home/zago/atusite/modem/*
+  rm -f /home/zago/atusite/samba/*
+  poweroff
+  exit
+Observe que no script acima tem estas linhas:
+
+  cd /home/zago/docs
+  ftp -vn www.zago.eti.br < atusite
+A primeira linha muda de diretório e a segunda executa o script de ftp "atusite" que está dentro do diretório docs, dentro deste "atuftp" tem os comandos de ftp, faz upload por diretório, o conteúdo dele com a senha modificada é este:
+
+  # cat /home/zago/docs/atusite 
+  user meulogin minhasenha
+  prompt
+  lcd /home/zago/atusite/
+  cd htdocs
+  mput *
+  lcd /home/zago/atusite/modem
+  cdup
+  cd modem
+  mput *
+  lcd /home/zago/atusite/samba
+  cdup
+  cd samba
+  mput *
+  #---corta---
+find por data e tipo de arquivo
+
+Procurar abaixo de determinado diretório, somente arquivos .tar.gz com mais de 10 dias, cuidado com os curingas, faça testes antes com echo para ver o resultado, veja neste exemplo o *.tar.gz entre aspas.
+
+find /mnt/hd2/backup/ -name "*.tar.gz" -mtime +10 -exec echo {} \;
+
+Se o resultado acima atende a procura, para apagar (remover), troque echo por rm.
+
+find /mnt/hd2/backup/ -name "*.tar.gz" -mtime +10 -exec rm {} \;
+
+find + sort
+
+Passe o resultado do "find" via pipe "|" para "sort" ordenar. Resulado longo ou filtro complexo, considere salvar em arquivo para depois ordenar.
+
+Listar arquivos por ordem de data.
+
+find /tmp -type f -printf '%TY-%Tm-%Td %TH:%TM:%TS %p\n' | sort
+
+Altere o caminho para o diretório que deseja pesquisar, também pode alterar os separadores
+
+/tmp -type f -printf '%TY-%Tm-%Td %TH:%TM:%TS %p\n' | sort
+
+Alguns exemplos mostrando somente nomes de arquivos
+
+  Em ordem normal
+  find /tmp/guiaz -type f -printf '%f\n' | sort
+  
+  Invertendo a ordem
+  find /tmp/guiaz -type f -printf '%f\n' | sort -r
+  
+  resultado na mesma linha sem separador
+  find /tmp -type f -printf '%f'
+  
+  resultado na mesma linha com separador, neste exemplo " ; ", troque pelo caractere desejado
+  find /tmp/guiaz -type f -printf '%f ; '
+  
+  Com quebra de linha, um nome por linha (\n) insere a quebra de linha
+  find /tmp/guiaz -type f
